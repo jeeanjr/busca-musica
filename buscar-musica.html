@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crie Sua Música — Minhas Músicas</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --gold:       #C9A84C;
+  --gold-hi:    #E8C97A;
+  --gold-dim:   rgba(201,168,76,0.15);
+  --gold-line:  rgba(201,168,76,0.2);
+  --dark:       #080604;
+  --dark2:      #110E07;
+  --dark3:      #1C1508;
+  --surface:    rgba(255,255,255,0.03);
+  --text:       #F0EBE0;
+  --text-dim:   #7A6E58;
+  --green:      #4ADE80;
+  --red:        #F87171;
+  --radius:     14px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--dark);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── BG ─── */
+.bg-fx {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -5%, rgba(201,168,76,0.10) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 50% at 100% 100%, rgba(201,168,76,0.04) 0%, transparent 55%);
+}
+
+.bg-grain {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px;
+}
+
+/* ─── LAYOUT ─── */
+.page {
+  position: relative; z-index: 1;
+  max-width: 640px; margin: 0 auto;
+  padding: 60px 20px 100px;
+}
+
+/* ─── HEADER ─── */
+.logo-row {
+  text-align: center; margin-bottom: 52px;
+}
+
+.logo-tag {
+  display: inline-block;
+  font-size: 9px; font-weight: 600;
+  letter-spacing: 0.5em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 28px;
+  padding: 6px 16px;
+  border: 1px solid var(--gold-line);
+  border-radius: 100px;
+}
+
+.bars {
+  display: flex; align-items: flex-end; justify-content: center;
+  gap: 4px; height: 40px; margin-bottom: 28px;
+}
+
+.bars span {
+  display: inline-block; width: 3px;
+  background: var(--gold); border-radius: 3px;
+  animation: barPulse 1.6s ease-in-out infinite;
+}
+
+.bars span:nth-child(1) { height: 10px; animation-delay: 0.0s; opacity: .4; }
+.bars span:nth-child(2) { height: 20px; animation-delay: 0.1s; opacity: .6; }
+.bars span:nth-child(3) { height: 34px; animation-delay: 0.2s; opacity: .8; }
+.bars span:nth-child(4) { height: 24px; animation-delay: 0.3s; opacity: .6; }
+.bars span:nth-child(5) { height: 40px; animation-delay: 0.15s; background: var(--gold-hi); }
+.bars span:nth-child(6) { height: 28px; animation-delay: 0.25s; opacity: .7; }
+.bars span:nth-child(7) { height: 34px; animation-delay: 0.05s; opacity: .8; }
+.bars span:nth-child(8) { height: 18px; animation-delay: 0.35s; opacity: .5; }
+.bars span:nth-child(9) { height: 10px; animation-delay: 0.4s; opacity: .3; }
+
+@keyframes barPulse {
+  0%,100% { transform: scaleY(1); }
+  50%      { transform: scaleY(1.35); opacity: 1; }
+}
+
+h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(34px, 8vw, 52px);
+  font-weight: 300; line-height: 1.1;
+  color: var(--text);
+}
+
+h1 em {
+  font-style: italic; color: var(--gold-hi);
+  font-weight: 400;
+}
+
+.sub {
+  margin-top: 14px;
+  font-size: 13px; font-weight: 300;
+  color: var(--text-dim); letter-spacing: 0.03em;
+}
+
+.rule {
+  width: 40px; height: 1px;
+  background: var(--gold); opacity: .35;
+  margin: 22px auto 0;
+}
+
+/* ─── SEARCH BOX ─── */
+.search-box {
+  margin-bottom: 36px;
+  background: var(--surface);
+  border: 1px solid var(--gold-line);
+  border-radius: var(--radius);
+  padding: 28px;
+  backdrop-filter: blur(12px);
+}
+
+.field-label {
+  font-size: 9px; font-weight: 600;
+  letter-spacing: 0.35em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 12px;
+  display: block;
+}
+
+.input-group {
+  display: flex; gap: 10px;
+}
+
+input[type=tel] {
+  flex: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(201,168,76,0.2);
+  border-radius: 10px;
+  padding: 15px 20px;
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  font-size: 16px; font-weight: 400;
+  outline: none;
+  transition: border-color .2s, background .2s;
+}
+
+input[type=tel]::placeholder { color: var(--text-dim); }
+
+input[type=tel]:focus {
+  border-color: var(--gold);
+  background: rgba(201,168,76,0.04);
+}
+
+.btn-search {
+  background: var(--gold);
+  color: #0E0C08;
+  border: none; border-radius: 10px;
+  padding: 15px 26px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px; font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background .2s, transform .1s;
+  white-space: nowrap;
+}
+
+.btn-search:hover  { background: var(--gold-hi); }
+.btn-search:active { transform: scale(.97); }
+.btn-search:disabled { opacity: .45; cursor: wait; }
+
+.hint {
+  font-size: 11px; color: var(--text-dim);
+  margin-top: 10px; font-weight: 300;
+}
+
+/* ─── STATES ─── */
+.state { display: none; text-align: center; padding: 48px 0; }
+.state.on { display: block; }
+
+.spinner {
+  width: 32px; height: 32px;
+  border: 2px solid var(--gold-dim);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin .75s linear infinite;
+  margin: 0 auto 14px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.state p { font-size: 13px; color: var(--text-dim); font-weight: 300; }
+
+/* ─── CARDS ─── */
+.cards { display: flex; flex-direction: column; gap: 18px; }
+
+.card {
+  background: var(--dark2);
+  border: 1px solid var(--gold-line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  animation: riseUp .45s ease both;
+}
+
+@keyframes riseUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.card-top {
+  background: linear-gradient(135deg, rgba(201,168,76,0.07) 0%, transparent 60%);
+  border-bottom: 1px solid var(--gold-line);
+  padding: 20px 24px;
+  display: flex; align-items: center; gap: 16px;
+}
+
+.card-avatar {
+  width: 44px; height: 44px;
+  background: rgba(201,168,76,0.1);
+  border: 1px solid var(--gold-line);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+
+.card-meta { flex: 1; min-width: 0; }
+
+.card-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px; font-weight: 400;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.card-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  margin-top: 3px;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+
+.badge-ready { color: var(--green); }
+.badge-wait  { color: var(--text-dim); }
+
+.badge-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: currentColor;
+}
+
+.card-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 10px; }
+
+/* Botões de ação */
+.action {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px; border-radius: 10px;
+  text-decoration: none; cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px; font-weight: 500;
+  transition: all .2s; border: none; width: 100%; text-align: left;
+}
+
+.action-icon {
+  width: 30px; height: 30px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+}
+
+.action-text { flex: 1; }
+.action-arrow { font-size: 12px; opacity: .5; }
+
+/* Página de presente */
+.a-pagina {
+  background: var(--gold);
+  color: #0E0C08;
+}
+.a-pagina .action-icon { background: rgba(0,0,0,0.15); }
+.a-pagina:hover { background: var(--gold-hi); }
+
+/* Player */
+.a-player {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--gold-line);
+}
+.a-player .action-icon { background: var(--gold-dim); }
+.a-player:hover { border-color: var(--gold); background: var(--gold-dim); }
+
+/* Recompra */
+.a-recompra {
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px dashed rgba(201,168,76,0.2);
+}
+.a-recompra .action-icon { background: rgba(255,255,255,0.03); }
+.a-recompra:hover { color: var(--gold); border-color: var(--gold); background: var(--gold-dim); }
+
+/* Divider entre ações */
+.action-divider {
+  height: 1px; background: var(--gold-line);
+  margin: 2px 0;
+}
+
+/* Em produção */
+.in-production {
+  text-align: center;
+  padding: 20px 16px;
+}
+
+.in-production .ico { font-size: 28px; margin-bottom: 10px; }
+
+.in-production p {
+  font-size: 12px; color: var(--text-dim);
+  font-weight: 300; line-height: 1.8;
+}
+
+.in-production a { color: var(--gold); text-decoration: none; }
+.in-production a:hover { text-decoration: underline; }
+
+/* ─── NOT FOUND ─── */
+.not-found { text-align: center; padding: 40px 20px; }
+.not-found .ico { font-size: 44px; margin-bottom: 16px; }
+.not-found p { font-size: 13px; color: var(--text-dim); line-height: 1.8; font-weight: 300; }
+.not-found a { color: var(--gold); text-decoration: none; }
+
+/* ─── FOOTER ─── */
+footer {
+  text-align: center; margin-top: 72px;
+  padding-top: 28px;
+  border-top: 1px solid rgba(201,168,76,0.08);
+}
+
+footer p {
+  font-size: 9px; letter-spacing: 0.4em;
+  text-transform: uppercase; color: var(--text-dim);
+}
+</style>
+</head>
+<body>
+<div class="bg-fx"></div>
+<div class="bg-grain"></div>
+
+<div class="page">
+
+  <!-- Header -->
+  <div class="logo-row">
+    <span class="logo-tag">Crie Sua Música · AD Music</span>
+    <div class="bars">
+      <span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span>
+    </div>
+    <h1>Suas <em>músicas</em></h1>
+    <p class="sub">Digite o WhatsApp cadastrado na compra</p>
+    <div class="rule"></div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-box">
+    <label class="field-label">Número de WhatsApp</label>
+    <div class="input-group">
+      <input type="tel" id="wa" placeholder="Ex: 47991234567" maxlength="20">
+      <button class="btn-search" id="btn" onclick="buscar()">Buscar</button>
+    </div>
+    <p class="hint">Digite com DDD. Ex: (47) 98883-4353</p>
+    <div style="height:1px;background:var(--gold-line);margin:20px 0;"></div>
+    <a href="javascript:void(0)" onclick="window.open(COMPRAR,'_blank')" class="action a-recompra" style="display:flex;">
+      <span class="action-icon">🎵</span>
+      <span class="action-text">Criar uma nova música para alguém especial</span>
+      <span class="action-arrow">→</span>
+    </a>
+  </div>
+
+  <!-- Loading -->
+  <div class="state" id="sLoading">
+    <div class="spinner"></div>
+    <p>Buscando suas músicas...</p>
+  </div>
+
+  <!-- Cards -->
+  <div class="cards" id="sCards"></div>
+
+  <!-- Not found -->
+  <div class="state" id="sNone">
+    <div class="not-found">
+      <div class="ico">🎵</div>
+      <p>
+        Nenhuma compra encontrada para esse número.<br>
+        Verifique se digitou igual ao usado na compra.<br><br>
+        Precisa de ajuda?
+        <a href="https://wa.me/554797197472" target="_blank">Fale com a Bia</a>
+      </p>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 Agência Digital LTDA · Crie Sua Música</p>
+  </footer>
+
+</div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────
+const SB_URL  = 'https://qqxmdszwvwooqonmnvzf.supabase.co';
+const SB_KEY  = 'COLE_AQUI_A_ANON_KEY'; // Settings → API → anon public
+const COMPRAR = 'https://digitalagencia.store/criesuamusica?utm_source=busca&utm_medium=recompra&utm_campaign=minha-musica';
+// ──────────────────────────────────────────────────────────
+
+const waInput = document.getElementById('wa');
+const btn     = document.getElementById('btn');
+
+waInput.addEventListener('input', () => {
+  let v = waInput.value.replace(/\D/g, '').slice(0, 11);
+  if (v.length === 0) { waInput.value = ''; return; }
+  if (v.length <= 2)  { waInput.value = '(' + v; return; }
+  if (v.length <= 7)  { waInput.value = '(' + v.slice(0,2) + ') ' + v.slice(2); return; }
+  waInput.value = '(' + v.slice(0,2) + ') ' + v.slice(2,7) + '-' + v.slice(7);
+});
+waInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') buscar();
+});
+
+function norm(wa) {
+  wa = wa.replace(/\D/g, '');
+  if (wa.startsWith('0') && wa.length > 11) wa = wa.slice(1);
+  if (wa.length === 10) wa = wa.slice(0,2) + '9' + wa.slice(2);
+  return wa;
+}
+
+function show(id) {
+  ['sLoading','sNone'].forEach(i => document.getElementById(i).classList.remove('on'));
+  if (id) document.getElementById(id).classList.add('on');
+}
+
+async function buscar() {
+  const wa = norm(waInput.value.trim());
+  if (wa.length < 10) {
+    waInput.style.borderColor = 'var(--red)';
+    waInput.focus();
+    setTimeout(() => waInput.style.borderColor = '', 1500);
+    return;
+  }
+
+  btn.disabled = true;
+  document.getElementById('sCards').innerHTML = '';
+  show('sLoading');
+
+  try {
+    const url = `${SB_URL}/rest/v1/leads?whatsapp=eq.${wa}&status_pagamento=eq.Pago` +
+                `&select=id,nome,gerou_musica,link_pagina,player_musica,link_audio,upsell` +
+                `&order=data_hora.asc`;
+
+    const res  = await fetch(url, {
+      headers: {
+        'apikey':        SB_KEY,
+        'Authorization': `Bearer ${SB_KEY}`
+      }
+    });
+    const data = await res.json();
+
+    show(null);
+
+    if (!data || data.length === 0) { show('sNone'); btn.disabled = false; return; }
+
+    const container = document.getElementById('sCards');
+
+    data.forEach((lead, idx) => {
+      const pronta = lead.gerou_musica && (lead.link_pagina || lead.player_musica || lead.link_audio);
+      const card   = document.createElement('div');
+      card.className = 'card';
+      card.style.animationDelay = (idx * 0.08) + 's';
+
+      const audioLink = lead.player_musica || lead.link_audio || '';
+      const temSite   = lead.upsell && lead.upsell.toLowerCase().includes('sim');
+
+      let acoes = '';
+
+      if (pronta) {
+        if (lead.link_pagina) {
+          acoes += `
+            <a href="${lead.link_pagina}" target="_blank" class="action a-pagina">
+              <span class="action-icon">🎁</span>
+              <span class="action-text">Abrir Página de Presente</span>
+              <span class="action-arrow">→</span>
+            </a>`;
+        }
+        if (audioLink) {
+          acoes += `
+            <a href="${audioLink}" target="_blank" class="action a-player">
+              <span class="action-icon">▶</span>
+              <span class="action-text">Ouvir a Música</span>
+              <span class="action-arrow">→</span>
+            </a>`;
+        }
+        acoes += `<div class="action-divider"></div>`;
+        acoes += `
+          <a href="${COMPRAR}" target="_blank" class="action a-recompra">
+            <span class="action-icon">🎵</span>
+            <span class="action-text">Criar uma nova música para alguém</span>
+            <span class="action-arrow">→</span>
+          </a>`;
+      } else {
+        acoes = `
+          <div class="in-production">
+            <div class="ico">⏳</div>
+            <p>
+              Sua música está sendo criada com carinho.<br>
+              Você receberá um e-mail em até 2 horas.<br><br>
+              Dúvidas? <a href="https://wa.me/554797197472" target="_blank">Fale com a Bia</a>
+            </p>
+          </div>
+          <div class="action-divider"></div>
+          <a href="${COMPRAR}" target="_blank" class="action a-recompra">
+            <span class="action-icon">🎵</span>
+            <span class="action-text">Criar uma nova música para alguém</span>
+            <span class="action-arrow">→</span>
+          </a>`;
+      }
+
+      card.innerHTML = `
+        <div class="card-top">
+          <div class="card-avatar">${pronta ? '🎵' : '⏳'}</div>
+          <div class="card-meta">
+            <div class="card-name">${lead.nome || 'Cliente'}</div>
+            <div class="card-badge ${pronta ? 'badge-ready' : 'badge-wait'}">
+              <span class="badge-dot"></span>
+              ${pronta ? 'Música pronta' : 'Em produção'}
+            </div>
+          </div>
+        </div>
+        <div class="card-body">${acoes}</div>`;
+
+      container.appendChild(card);
+    });
+
+  } catch (err) {
+    show(null);
+    document.getElementById('sCards').innerHTML = `
+      <div class="not-found">
+        <div class="ico">⚠️</div>
+        <p>Erro ao buscar. <a href="https://wa.me/554797197472">Fale com a Bia</a></p>
+      </div>`;
+  }
+
+  btn.disabled = false;
+}
+</script>
+</body>
+</html>
